@@ -1,0 +1,19 @@
+version: 2.1
+
+orbs:
+  aws-ecr: circleci/aws-ecr@6.15.3
+
+workflows:
+  build_and_push:
+    jobs:
+      - aws-ecr/build-and-push-image:
+          name: go-rest-build-and-push-image
+          repo: go-rest
+          tag: "latest,v0.1.<<pipeline.number>>"
+          dockerfile: Dockerfile
+          path: .
+          filters:
+            branches:
+              only: master
+          context:
+            - ecr-eu-central
