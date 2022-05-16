@@ -1,9 +1,13 @@
 package controllers
 
 import (
+	"context"
 	"go-rest/basics/models"
+	"log"
 	"net/http"
+	"strconv"
 
+	dapr "github.com/dapr/go-sdk/client"
 	"github.com/gin-gonic/gin"
 )
 
@@ -13,12 +17,36 @@ var albums = []models.Album{
 	{ID: "3", Title: "Sarah Vaughan and Clifford Brown", Artist: "Sarah Vaughan", Price: 39.99},
 }
 
+func publishMessage(c *gin.Context) {
+
+	client, err := dapr.NewClient()
+
+	if err != nil {
+		panic(err)
+	}
+
+	defer client.Close()
+
+	ctx := context.Background()
+	if err := client.PublishEvent(ctx, "pubsub", "orders", []byte(strconv.Itoa(10))); err != nil {
+		panic(err)
+	}
+
+	log.Println("published data")
+}
+
 func SetupRoutes(router *gin.Engine) {
 	router.GET("/", getAlbums)
 	router.POST("/", postAlbum)
 	router.GET("/:id", getAlbumById)
 	router.PATCH("/:id", updateAlbum)
 	router.DELETE("/:id", deleteAlbum)
+	router.POST("/publish-message", publishMessage)
+	router.GET("/health", checkHealth)
+}
+
+func checkHealth(c *gin.Context) {
+	c.JSON(http.StatusOK, gin.H{"status": "Running"})
 }
 
 func getAlbums(c *gin.Context) {
