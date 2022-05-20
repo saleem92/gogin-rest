@@ -15,5 +15,4 @@ workflows:
           filters:
             branches:
               only: master
-          context:
-            - ecr-eu-central
+          context: ecr-eu-central
